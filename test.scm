@@ -386,8 +386,3 @@
 (define the-global-environment (setup-environment))
 (driver-loop)
 
-(define count 0)
-(define (id x)
-  (set! count (+ count 1))
-  x)
-(define w (id (id (id (id 10)))))
