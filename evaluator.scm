@@ -231,7 +231,8 @@
         (list 'cdr cdr)
         (list 'cons cons)
         (list 'null? null?)
-        (list '+ +)))
+        (list '+ +)
+        (list '* *)))
 (define (primitive-procedure-names)
   (map car
        primitive-procedures))
@@ -334,24 +335,11 @@
 (define (thunk-exp thunk) (cadr thunk))
 (define (thunk-env thunk) (caddr thunk))
 
-;; memoized thunks
-(define (evaluated-thunk? obj)
-  (tagged-list? obj 'evaluated-thunk))
-(define (thunk-value evaluated-thunk) (cadr evaluated-thunk))
-
 (define (force-it obj)
-  (cond ((thunk? obj)
-         (let ((result (actual-value
-                        (thunk-exp obj)
-                        (thunk-env obj))))
-           (set-car! obj 'evaluated-thunk)
-           (set-car! (cdr obj) result)  ; replace exp with its value
-           (set-cdr! (cdr obj) '())     ; forget unneeded env
-           result))
-        ((evaluated-thunk? obj)
-         (thunk-value obj))
-        (else obj)))
-
+  (if (thunk? obj)
+      (actual-value (thunk-exp obj) (thunk-env obj))
+      obj))
+           
 
 ;; REPL
 (define input-prompt ";;; L-Eval input:")
@@ -390,4 +378,6 @@
 (define (id x)
   (set! count (+ count 1))
   x)
-(define w (id (id (id (id 10)))))
+(define (square x)
+  (* x x))
+(square (id 10))
